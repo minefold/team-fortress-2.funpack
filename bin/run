@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# ## Usage
+#
+#     $ bin/run <config-file>
+#
+# ## ENV
+# 
+#    FUNPACK_HOME
+#    GAME_HOME
+#    PORT
+
+# the real home is in orangebox, but the parent dir needs to exist also
+GAME_HOME=$GAME_HOME/orangebox
+
+cp $FUNPACK_HOME/bin/server.cfg.default $GAME_HOME/tf/cfg/server.cfg
+
+SERVER_NAME="tf2/whatupdave"
+FPS=300
+BOOST=2
+GAME_PARAMETERS="-autoupdate -console -secure -game tf -nobrakepad -pingboost $BOOST"
+MAP="cp_badlands" # `randline $GAME_HOME/tf/mapcycle.txt`
+CONSOLE_CMDS="+hostname $SERVER_NAME +sv_lan 0 +hostport $PORT +map $MAP +maxplayers 26 +fps_max $FPS"
+
+echo "Starting TF2"
+
+cd $GAME_HOME
+
+export RDTSC_FREQUENCY=2925.000000
+$GAME_HOME/srcds_run $GAME_PARAMETERS $CONSOLE_CMDS
+

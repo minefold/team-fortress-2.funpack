@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# ## Usage
+#
+#     $ bin/compile <build-dir> <cache-dir>
+
+BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
+ROOT_DIR=$(dirname $BIN_DIR)
+BUILD_DIR=$1
+CACHE_DIR=$2
+
+mkdir -p $CACHE_DIR
+
+cd $CACHE_DIR
+if [ ! -f hldsupdatetool.bin ]
+then
+    wget http://storefront.steampowered.com/download/hldsupdatetool.bin
+    chmod +x hldsupdatetool.bin
+fi
+
+echo "yes" | ./hldsupdatetool.bin
+./steam
+mkdir orangebox
+./steam -command update -game tf -dir .
+
+rm -rf $BUILD_DIR/*
+cp -R . $BUILD_DIR
