@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+$stdout.sync = true
+
+i = 0
+loop do
+  i += 1
+  puts "#{i}"
+  sleep 1
+end

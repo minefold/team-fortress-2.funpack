@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+
+# usage: run | transform
+# transforms server output to minefold friendly output
+
+require 'time'
+require 'json'
+
+STDOUT.sync = true
+STDIN.sync = true
+
+# Events:
+# started
+# stopping
+# player_connected      { playername: '..' }
+# player_disconnected
+# chatted
+# opped
+# deopped
+# whitelist_added
+# whitelist_removed
+# banned
+# pardoned
+# info    
+# warning 
+# critical
+
+def readable args
+  args.map{|k,v| "#{k}=#{v.include?(' ') ? ("\"" + v + "\"") : v}"}.join(' ')
+end
+
+def event type, options = {}
+  args = {ts: Time.now.utc.iso8601, event: type }.merge(options)
+  # puts JSON.dump(args)
+  puts readable(args)
+end
+
+$stdin.each do |line|
+  case
+  when line.include?('via HTTP; update is queued')
+    event 'started', msg: line.strip
+  else
+    event 'info', msg: line.strip
+  end
+end
