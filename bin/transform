@@ -9,6 +9,8 @@ require 'json'
 STDOUT.sync = true
 STDIN.sync = true
 
+HUMAN_FRIENDLY = ARGV.include?('-h')
+
 # Events:
 # started
 # stopping
@@ -21,24 +23,43 @@ STDIN.sync = true
 # whitelist_removed
 # banned
 # pardoned
-# info    
-# warning 
+# info
+# warning
 # critical
 
-def readable args
-  args.map{|k,v| "#{k}=#{v.include?(' ') ? ("\"" + v + "\"") : v}"}.join(' ')
+def readable type, options={}
+  "#{Time.now.utc.strftime('%Y-%b-%d %H:%M:%S')} [#{type}] " +
+    options.map{|k,v| "#{k}=#{v.include?(' ') ? ("\"" + v + "\"") : v}"}.join(' ')
+end
+
+def json type, options={}
+  args = {ts: Time.now.utc.iso8601, event: type }.merge(options)
+  JSON.dump(args)
 end
 
 def event type, options = {}
-  args = {ts: Time.now.utc.iso8601, event: type }.merge(options)
-  # puts JSON.dump(args)
-  puts readable(args)
+  line = if HUMAN_FRIENDLY
+    readable type, options
+  else
+    json type, options
+  end
+  puts line
 end
 
 $stdin.each do |line|
   case
   when line.include?('via HTTP; update is queued')
-    event 'started', msg: line.strip
+    event 'started'
+
+  when line =~ /\"([^\<]+)(.*)entered the game/
+    event 'player_connected', playername: $1
+
+  when line =~ /\"([^\<]+)(.*) disconnected \(reason \"(.+)\"/
+    event 'player_disconnected', playername: $1, reason: $2
+
+  when line =~ /\"([^\<]+).* say (.+)/
+    event 'chatted', playername: $1, msg: $2.gsub(/^"|"?$/, '')
+
   else
     event 'info', msg: line.strip
   end

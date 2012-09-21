@@ -19,11 +19,10 @@ SERVER_NAME="tf2/whatupdave"
 FPS=300
 BOOST=2
 GAME_PARAMETERS="-autoupdate -console -secure -game tf -nobrakepad -pingboost $BOOST"
-MAP="cp_badlands" # `randline $GAME_HOME/tf/mapcycle.txt`
+MAP=`cat $GAME_HOME/tf/mapcycle.txt | sort -R | head -n1`
 CONSOLE_CMDS="+hostname $SERVER_NAME +sv_lan 0 +hostport $PORT +map $MAP +maxplayers 26 +fps_max $FPS"
 
 cd $GAME_HOME
 
-export RDTSC_FREQUENCY=2925.000000
-unbuffer $GAME_HOME/srcds_run $GAME_PARAMETERS $CONSOLE_CMDS 2>&1 | $FUNPACK_HOME/bin/transform
-
+# export RDTSC_FREQUENCY=2925.000000
+exec unbuffer $GAME_HOME/srcds_run $GAME_PARAMETERS $CONSOLE_CMDS 2>&1 | $FUNPACK_HOME/bin/transform "$@"
