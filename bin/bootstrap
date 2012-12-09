@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
+# this runs once per machine. We use it to download TF2
+# the cache-dir is for temporary storage
+# the build-dir will be made available to the run command
+
 # ## Usage
 #
-#     $ bin/compile <build-dir> <cache-dir>
+#     $ bin/bootstrap <build-dir> <cache-dir>
 
 BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
 ROOT_DIR=$(dirname $BIN_DIR)
@@ -21,6 +25,7 @@ fi
 echo "yes" | ./hldsupdatetool.bin
 ./steam
 mkdir orangebox
+./steam -command update -game tf -dir .
 ./steam -command update -game tf -dir .
 
 rm -rf $BUILD_DIR/*

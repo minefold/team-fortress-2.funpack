@@ -1,28 +1,83 @@
-#!/usr/bin/env bash
+#!/usr/bin/env ruby
+require 'time'
+require 'json'
+require 'open3'
 
-# ## Usage
-#
-#     $ bin/run <config-file>
-#
-# ## ENV
-# 
-#    FUNPACK_HOME
-#    GAME_HOME
-#    PORT
+$:.unshift File.expand_path('../../lib', __FILE__)
 
-# the real home is in orangebox, but the parent dir needs to exist also
-GAME_HOME=$GAME_HOME/orangebox
+require 'log_processor'
 
-cp $FUNPACK_HOME/bin/server.cfg.default $GAME_HOME/tf/cfg/server.cfg
+# ---
 
-SERVER_NAME="tf2/whatupdave"
-FPS=300
-BOOST=2
-GAME_PARAMETERS="-autoupdate -console -secure -game tf -nobrakepad -pingboost $BOOST"
-MAP=`cat $GAME_HOME/tf/mapcycle.txt | sort -R | head -n1`
-CONSOLE_CMDS="+hostname $SERVER_NAME +sv_lan 0 +hostport $PORT +map $MAP +maxplayers 26 +fps_max $FPS"
+STDOUT.sync = true
+STDIN.sync = true
 
-cd $GAME_HOME
+# usage: ./run <config>
 
-# export RDTSC_FREQUENCY=2925.000000
-exec unbuffer $GAME_HOME/srcds_run $GAME_PARAMETERS $CONSOLE_CMDS 2>&1 | $FUNPACK_HOME/bin/transform "$@"
+config_path = ARGV.shift
+build_dir = ENV['BUILD_DIR']
+root = File.expand_path('../..', __FILE__)
+
+config = JSON.parse(File.read(config_path))
+
+server_id = 1
+default_cfg = "#{build_dir}/orangebox/tf/cfg/server.cfg"
+server_cfg = "#{build_dir}/orangebox/tf/cfg/server-#{server_id}.cfg"
+
+system %Q{
+rm -f #{default_cfg}
+cp #{root}/templates/server.cfg.default #{server_cfg}
+echo "440" > #{build_dir}/orangebox/steam_appid.txt
+}
+
+Dir.chdir("#{build_dir}/orangebox") do
+  Open3.popen3("./srcds_run",
+          "-autoupdate",
+          # "-console",
+          "-verify_all",
+          "-secure",
+          "-game", "tf",
+          "-nobrakepad",
+          "-pingboost", "2",
+          "+hostname", "tf2/whatupdave",
+          "+sv_lan", "0",
+          "+hostport", config['port'].to_s,
+          "+map", `cat #{build_dir}/orangebox/tf/mapcycle.txt | sort -R | head -n1`.strip,
+          "+maxplayers", "24",
+          "+fps_max", "300",
+          "+exec", "server-#{server_id}.cfg") do |stdin, stdout, stderr, wait_thr|
+
+    processor = LogProcessor.new(wait_thr.pid, STDOUT)
+
+    begin
+      # read stdin. On list command we call partylist
+      # which is a custom plugin designed to return the real player names
+      # instead of nicknames
+      Thread.new do
+        while true
+          input = STDIN.readline.strip
+          case input
+          when 'list'
+            stdin.puts(processor.players_list)
+          when /^kick (.*)$/
+            stdin.puts("kickid #{$1}")
+          else
+            stdin.puts(input)
+          end
+        end
+      end
+
+      # flush the output stream
+      Thread.new do
+        stdin.puts
+        sleep 5
+      end
+
+      while true
+        processor.process_line(stdout.readline)
+      end
+    rescue EOFError
+    end
+    exit_status = wait_thr.value
+  end
+end
