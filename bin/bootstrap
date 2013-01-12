@@ -8,10 +8,12 @@
 #
 #     $ bin/bootstrap <build-dir> <cache-dir>
 
+set -ex
+
 BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
 ROOT_DIR=$(dirname $BIN_DIR)
-BUILD_DIR=$1
-CACHE_DIR=$2
+BUILD_DIR=$(cd $1; pwd)
+CACHE_DIR=$(cd $2; pwd)
 
 mkdir -p $CACHE_DIR
 
@@ -24,7 +26,6 @@ fi
 
 echo "yes" | ./hldsupdatetool.bin
 ./steam
-mkdir orangebox
 ./steam -command update -game tf -dir .
 ./steam -command update -game tf -dir .
 

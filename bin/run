@@ -6,6 +6,7 @@ require 'open3'
 $:.unshift File.expand_path('../../lib', __FILE__)
 
 require 'log_processor'
+require 'settings'
 
 # ---
 
@@ -20,15 +21,17 @@ root = File.expand_path('../..', __FILE__)
 
 config = JSON.parse(File.read(config_path))
 
-server_id = 1
+server_id = 2
 default_cfg = "#{build_dir}/orangebox/tf/cfg/server.cfg"
 server_cfg = "#{build_dir}/orangebox/tf/cfg/server-#{server_id}.cfg"
 
 system %Q{
 rm -f #{default_cfg}
-cp #{root}/templates/server.cfg.default #{server_cfg}
 echo "440" > #{build_dir}/orangebox/steam_appid.txt
 }
+
+s = Settings.new(config['settings'])
+File.write(server_cfg, s.erb(File.read("#{root}/templates/server.cfg.erb")))
 
 Dir.chdir("#{build_dir}/orangebox") do
   Open3.popen3("./srcds_run",
@@ -47,7 +50,7 @@ Dir.chdir("#{build_dir}/orangebox") do
           "+fps_max", "300",
           "+exec", "server-#{server_id}.cfg") do |stdin, stdout, stderr, wait_thr|
 
-    processor = LogProcessor.new(wait_thr.pid, STDOUT)
+    processor = LogProcessor.new
 
     begin
       # read stdin. On list command we call partylist
@@ -70,11 +73,12 @@ Dir.chdir("#{build_dir}/orangebox") do
       # flush the output stream
       Thread.new do
         stdin.puts
-        sleep 5
+        sleep 3
       end
 
       while true
-        processor.process_line(stdout.readline)
+        event = processor.process_line(stdout.readline)
+        puts JSON.dump(event)
       end
     rescue EOFError
     end

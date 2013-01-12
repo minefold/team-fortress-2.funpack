@@ -1,0 +1,7 @@
+{
+  "mp_maxrounds": 23,
+  "mp_autoteambalance": true,
+  "mp_autoteambalance_delay": 60,
+  "mp_autoteambalance_warning_delay": 30,
+  "mp_teams_unbalance_limit": 30
+}

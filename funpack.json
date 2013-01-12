@@ -1,0 +1,41 @@
+{ 
+  "name": "Team Fortress 2",
+  "slug": "team-fortress-2",
+  "summary": "Simple Bukkit funpack with Essentials, WorldEdit and more",
+  "description": "Simple Bukkit funpack with Essentials, WorldEdit and more",
+  "keywords" : ["tf2", "team fortress 2"],
+  "homepage": "https://github.com/minefold/team-fortress-2",
+  "authors" : ["Dave Newman <dave@minefold.com>"],
+  
+  "settings": [{
+      "name": "mp_maxrounds",
+      "type": "integer",
+      "label": "Max Rounds",
+      "description": "Maximum number of rounds to play before server changes maps.",
+      "default": 5
+    }, {
+      "name": "mp_autoteambalance",
+      "type": "boolean",
+      "label": "Auto Team Balance",
+      "default": true
+    }, {
+      "name": "mp_autoteambalance_delay",
+      "type": "integer",
+      "label": "Auto Balance Delay (seconds)",
+      "description": "Time after the teams become unbalanced to attempt to switch players.",
+      "default": 60
+    }, {
+      "name": "mp_autoteambalance_warning_delay",
+      "type": "integer",
+      "label": "Auto Balance Warning (seconds)",
+      "description": "Time after the teams become unbalanced to print a balance warning",
+      "default": 30
+    }, {
+      "name": "mp_teams_unbalance_limit",
+      "type": "integer",
+      "label": "Auto Unbalance Limit",
+      "description": "Teams are unbalanced when one team has this many more players than the other team. (0 disables check)",
+      "default": 30
+    }
+  ]
+}

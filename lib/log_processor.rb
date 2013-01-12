@@ -3,22 +3,14 @@ require 'time'
 require 'set'
 
 class LogProcessor
-  def initialize(pid, out)
-    @pid = pid
-    @out = out
+  def initialize
     @listing = false
 
     @users = Set.new
   end
 
   def process_line(line)
-    line.gsub!(/L [\d\/]+ - [\d:]+ /, '')
-    # puts line
-    # TODO
-    # stopping
-    # settings_changed
-    # fatal_error - failed to start, port bound?
-    # players
+    line = line.gsub(/L [\d\/]+ - [\d:]+ /, '')
 
     if @listing
       process_list_line(line)
@@ -29,30 +21,34 @@ class LogProcessor
 
   def process_regular_line(line)
     case line
-    when /^\"(.*)\" entered the game$/
-      # username looks like this: chrsllyd<2><STEAM_0:1:123456><>
-      # we want the STEAM_X:Y:Z part
-      matches = $1.scan(/<([^>]+)>/)
-      slot = matches[0][0]
-      userid = matches[1][0]
-      @users.add(userid)
+    when /^\"([^\<]+.*)\" entered the game$/
+      username, slot, account = parse_connected_user($1)
+      event 'player_connected',
+        account: account, account_type: 'steam', username: username
 
-      event 'player_connected', username: userid
+    when /^Client "(\w+)" connected \(([\d\.:]+)\).$/
+      username, address = $1, $2
+      event 'player_connected',
+        username: username, address: address
 
-    when /\"([^\<]+)(.*) disconnected \(reason \"(.+)\"/
-      matches = $1.scan(/<([^>]+)>/)
-      userid = matches[1][0]
-      @users.delete(userid)
+    when /\"([^\<]+.*) disconnected \(reason \"(.+)\"/
+      username, slot, account = parse_connected_user($1)
+      event 'player_disconnected',
+        account: account, account_type: 'steam', username: username,
+        reason: $2
+
+    when /^Dropped (\w+) from server \(([^\)]+)\)$/
       event 'player_disconnected', username: $1, reason: $2
 
     when /\"([^\<]+).* say (.+)/
       event 'chat', username: $1, msg: $2.gsub(/^"|"?$/, '')
 
-    when /^Connection to game coordinator established\.$/
-      event 'started'
+    when /^Sending CMsgGameServerMatchmakingStatus/
+      event 'started', msg: line
 
-    when '<slot:userid:\"name\">'
+    when %Q{<slot:userid:"name">}
       @listing = true
+      nil
 
     else
       event 'info', msg: line.strip
@@ -64,28 +60,30 @@ class LogProcessor
     # end
   end
 
-  def players_list
-    event 'players_list', usernames: @users.to_a
-  end
-
   def process_list_line(line)
     case line
     when /^\d+ users/
       @listing = false
+      event 'players_list', usernames: @users.to_a
 
     when /:/
-      slot = line.split(':')[1]
-
-
+      slot, userid, username = line.split(':')
+      @users.add(username.gsub(/^"|"$/, ''))
     end
   end
 
+  # chrsllyd<2><STEAM_0:1:123456><>
+  def parse_connected_user(user)
+    user =~ /([^<]+)<(\d+)><([^>]+)>/
+    [$1, $2, $3]
+  end
+
+
   def event(event, options = {})
-    @out.puts JSON.dump({
+    {
       ts: Time.now.utc.iso8601,
       event: event,
-      pid: @pid
-    }.merge(options))
+    }.merge(options)
   end
 
   # def port_bound?(port)
