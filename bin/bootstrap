@@ -8,7 +8,7 @@
 #
 #     $ bin/bootstrap <build-dir> <cache-dir>
 
-set -ex
+# set -ex
 
 BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
 ROOT_DIR=$(dirname $BIN_DIR)

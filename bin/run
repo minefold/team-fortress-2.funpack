@@ -11,7 +11,7 @@ require 'settings'
 # ---
 
 STDOUT.sync = true
-STDIN.sync = true
+$stdin.sync = true
 
 # usage: ./run <config>
 
@@ -58,10 +58,10 @@ Dir.chdir("#{build_dir}/orangebox") do
       # instead of nicknames
       Thread.new do
         while true
-          input = STDIN.readline.strip
+          input = $stdin.readline.strip
           case input
           when 'list'
-            stdin.puts(processor.players_list)
+            stdin.puts('users')
           when /^kick (.*)$/
             stdin.puts("kickid #{$1}")
           else
@@ -78,7 +78,7 @@ Dir.chdir("#{build_dir}/orangebox") do
 
       while true
         event = processor.process_line(stdout.readline)
-        puts JSON.dump(event)
+        puts JSON.dump(event) if event
       end
     rescue EOFError
     end

@@ -10,7 +10,7 @@ class LogProcessor
   end
 
   def process_line(line)
-    line = line.gsub(/L [\d\/]+ - [\d:]+ /, '')
+    line = line.gsub(/L [\d\/]+ - [\d:]+ /, '').strip
 
     if @listing
       process_list_line(line)

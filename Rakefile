@@ -21,7 +21,7 @@ task :start do
   sid = "1234"
   server_path = "tmp/servers/#{sid}"
 
-  system %Q{
+  exec %Q{
     rm -rf #{server_path}
     mkdir -p #{server_path}
     cp test/fixtures/ok.json #{server_path}/settings.json
@@ -31,8 +31,8 @@ task :start do
 end
 
 task :publish do
-  paths = %w(bin lib templates)
+  paths = %w(bin lib templates Gemfile Gemfile.lock)
   system %Q{
-    ../../tools/archive-dir s3://party-cloud-production/funpacks/slugs/team-fortress-2/stable.tar.lzo #{paths.join(' ')}
+    archive-dir http://party-cloud-production.s3.amazonaws.com/funpacks/slugs/team-fortress-2/stable.tar.lzo #{paths.join(' ')}
   }
 end
