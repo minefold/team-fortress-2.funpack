@@ -34,7 +34,9 @@ s = Settings.new(config['settings'])
 File.write(server_cfg, s.erb(File.read("#{root}/templates/server.cfg.erb")))
 
 Dir.chdir("#{build_dir}/orangebox") do
-  Open3.popen3("./srcds_run",
+  Open3.popen3("unbuffer",
+          "-p",
+          "./srcds_run",
           "-autoupdate",
           # "-console",
           "-verify_all",
@@ -61,19 +63,15 @@ Dir.chdir("#{build_dir}/orangebox") do
           input = $stdin.readline.strip
           case input
           when 'list'
-            stdin.puts('users')
+            stdin.puts("users")
           when /^kick (.*)$/
             stdin.puts("kickid #{$1}")
+          when 'stop'
+            Process.kill :TERM, wait_thr.pid
           else
             stdin.puts(input)
           end
         end
-      end
-
-      # flush the output stream
-      Thread.new do
-        stdin.puts
-        sleep 3
       end
 
       while true

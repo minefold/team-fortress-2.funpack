@@ -69,6 +69,11 @@ class LogProcessor
     when /:/
       slot, userid, username = line.split(':')
       @users.add(username.gsub(/^"|"$/, ''))
+      nil
+
+    else
+      @listing = false
+      nil
     end
   end
 
