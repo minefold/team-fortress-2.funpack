@@ -33,53 +33,58 @@ echo "440" > #{build_dir}/orangebox/steam_appid.txt
 s = Settings.new(config['settings'])
 File.write(server_cfg, s.erb(File.read("#{root}/templates/server.cfg.erb")))
 
-Dir.chdir("#{build_dir}/orangebox") do
-  Open3.popen3("unbuffer",
-          "-p",
-          "./srcds_run",
-          "-autoupdate",
-          # "-console",
-          "-verify_all",
-          "-secure",
-          "-game", "tf",
-          "-nobrakepad",
-          "-pingboost", "2",
-          "+hostname", "tf2/whatupdave",
-          "+sv_lan", "0",
-          "+hostport", config['port'].to_s,
-          "+map", `cat #{build_dir}/orangebox/tf/mapcycle.txt | sort -R | head -n1`.strip,
-          "+maxplayers", "24",
-          "+fps_max", "300",
-          "+exec", "server-#{server_id}.cfg") do |stdin, stdout, stderr, wait_thr|
+# debugging
+File.open('server.log', 'w+') do |log_file|
+  log_file.sync = true
 
-    processor = LogProcessor.new
+  Dir.chdir("#{build_dir}/orangebox") do
+    Open3.popen3("unbuffer",
+            "-p",
+            "./srcds_run",
+            "-autoupdate",
+            "-verify_all",
+            "-secure",
+            "-game", "tf",
+            "-nobrakepad",
+            "-pingboost", "2",
+            "+sv_lan", "0",
+            "+hostport", config['port'].to_s,
+            "+map", `cat #{build_dir}/orangebox/tf/mapcycle.txt | sort -R | head -n1`.strip,
+            "+maxplayers", "24",
+            "+fps_max", "300",
+            "+exec", "server-#{server_id}.cfg") do |stdin, stdout, stderr, wait_thr|
 
-    begin
-      # read stdin. On list command we call partylist
-      # which is a custom plugin designed to return the real player names
-      # instead of nicknames
-      Thread.new do
-        while true
-          input = $stdin.readline.strip
-          case input
-          when 'list'
-            stdin.puts("users")
-          when /^kick (.*)$/
-            stdin.puts("kickid #{$1}")
-          when 'stop'
-            Process.kill :TERM, wait_thr.pid
-          else
-            stdin.puts(input)
+      processor = LogProcessor.new
+
+      begin
+        Thread.new do
+          while true
+            input = $stdin.readline.strip
+            case input
+            when 'list'
+              stdin.puts("users")
+            when /^kick (.*)$/
+              stdin.puts("kickid #{$1}")
+            when 'stop'
+              Process.kill :TERM, wait_thr.pid
+            else
+              stdin.puts(input)
+            end
           end
         end
-      end
 
-      while true
-        event = processor.process_line(stdout.readline)
-        puts JSON.dump(event) if event
+          while true
+            line = stdout.readline
+
+            # debugging
+            log_file.puts(line)
+
+            event = processor.process_line(line)
+            puts JSON.dump(event) if event
+          end
+      rescue EOFError
       end
-    rescue EOFError
+      exit_status = wait_thr.value
     end
-    exit_status = wait_thr.value
   end
 end
