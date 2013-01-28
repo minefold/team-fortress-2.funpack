@@ -19,6 +19,27 @@ class LogProcessor
 
   def process_regular_line(line)
     case line
+    # with STEAM_ID
+    when /^\"([^\<]+.*)\" entered the game$/
+      username, slot, account = parse_connected_user($1)
+      event 'player_connected',
+        account: account, account_type: 'steam', username: username
+
+    when /\"([^\<]+.*) disconnected \(reason \"(.+)\"/
+      username, slot, account = parse_connected_user($1)
+      event 'player_disconnected',
+        account: account, account_type: 'steam', username: username,
+        reason: $2
+
+    # no STEAM_ID
+    when /^Client "(\w+)" connected \(([\d\.:]+)\).$/
+      username, address = $1, $2
+      event 'player_connected',
+        username: username, address: address
+
+    when /^Dropped (\w+) from server \(([^\)]+)\)$/
+      event 'player_disconnected', username: $1, reason: $2
+
     when /\"([^\<]+).* say (.+)/
       event 'chat', username: $1, msg: $2.gsub(/^"|"?$/, '')
 
@@ -39,7 +60,7 @@ class LogProcessor
   def emit_players_list
     if @user_count == @users.size
       @listing = false
-      event 'players_list', usernames: @users.to_a
+      event 'players_list', account_type: 'steam', accounts: @users.to_a
     end
   end
 
@@ -53,7 +74,7 @@ class LogProcessor
       @users.add($2)
       emit_players_list
     else
-      
+
       emit_players_list
     end
   end

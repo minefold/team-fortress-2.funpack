@@ -80,7 +80,12 @@ File.open('server.log', 'w+') do |log_file|
             log_file.puts(line)
 
             event = processor.process_line(line)
-            puts JSON.dump(event) if event
+            if event
+              if %w(player_connected player_disconnected).include?(event[:event])
+                stdin.puts 'status'
+              end
+              puts JSON.dump(event)
+            end
           end
       rescue EOFError
       end
