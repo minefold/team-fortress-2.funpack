@@ -21,7 +21,7 @@ root = File.expand_path('../..', __FILE__)
 
 config = JSON.parse(File.read(config_path))
 
-server_id = 2
+server_id = `uuidgen`.strip
 default_cfg = "#{build_dir}/orangebox/tf/cfg/server.cfg"
 server_cfg = "#{build_dir}/orangebox/tf/cfg/server-#{server_id}.cfg"
 
@@ -62,7 +62,7 @@ File.open('server.log', 'w+') do |log_file|
             input = $stdin.readline.strip
             case input
             when 'list'
-              stdin.puts("users")
+              stdin.puts("status")
             when /^kick (.*)$/
               stdin.puts("kickid #{$1}")
             when 'stop'

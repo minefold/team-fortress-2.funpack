@@ -5,8 +5,6 @@ require 'set'
 class LogProcessor
   def initialize
     @listing = false
-
-    @users = Set.new
   end
 
   def process_line(line)
@@ -21,59 +19,42 @@ class LogProcessor
 
   def process_regular_line(line)
     case line
-    when /^\"([^\<]+.*)\" entered the game$/
-      username, slot, account = parse_connected_user($1)
-      event 'player_connected',
-        account: account, account_type: 'steam', username: username
-
-    when /^Client "(\w+)" connected \(([\d\.:]+)\).$/
-      username, address = $1, $2
-      event 'player_connected',
-        username: username, address: address
-
-    when /\"([^\<]+.*) disconnected \(reason \"(.+)\"/
-      username, slot, account = parse_connected_user($1)
-      event 'player_disconnected',
-        account: account, account_type: 'steam', username: username,
-        reason: $2
-
-    when /^Dropped (\w+) from server \(([^\)]+)\)$/
-      event 'player_disconnected', username: $1, reason: $2
-
     when /\"([^\<]+).* say (.+)/
       event 'chat', username: $1, msg: $2.gsub(/^"|"?$/, '')
 
     when /^Sending CMsgGameServerMatchmakingStatus/
       event 'started', msg: line
 
-    when %Q{<slot:userid:"name">}
+    when /^hostname: /
       @listing = true
+      @user_count = nil
+      @users = Set.new
       nil
 
     else
       event 'info', msg: line.strip
     end
+  end
 
-    # if !@started and port_bound?(@port)
-    #   @started = true
-    #   event 'started'
-    # end
+  def emit_players_list
+    if @user_count == @users.size
+      @listing = false
+      event 'players_list', usernames: @users.to_a
+    end
   end
 
   def process_list_line(line)
     case line
-    when /^\d+ users/
-      @listing = false
-      event 'players_list', usernames: @users.to_a
-
-    when /:/
-      slot, userid, username = line.split(':')
-      @users.add(username.gsub(/^"|"$/, ''))
+    when /^players\s+:\s+(\d+)\s+\(\d+ max\)$/
+      @user_count = $1.to_i
       nil
 
+    when /#\s+\d+\s+"([^"]+)"\s+(STEAM[^ ]+)/
+      @users.add($2)
+      emit_players_list
     else
-      @listing = false
-      nil
+      
+      emit_players_list
     end
   end
 
@@ -90,8 +71,4 @@ class LogProcessor
       event: event,
     }.merge(options)
   end
-
-  # def port_bound?(port)
-  #   `netstat -lntp 2> /dev/null | grep :#{port} | wc -l`.strip.to_i > 0
-  # end
 end
