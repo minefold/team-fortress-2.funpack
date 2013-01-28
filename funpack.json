@@ -1,12 +1,4 @@
 { 
-  "name": "Team Fortress 2",
-  "slug": "team-fortress-2",
-  "summary": "Simple Bukkit funpack with Essentials, WorldEdit and more",
-  "description": "Simple Bukkit funpack with Essentials, WorldEdit and more",
-  "keywords" : ["tf2", "team fortress 2"],
-  "homepage": "https://github.com/minefold/team-fortress-2",
-  "authors" : ["Dave Newman <dave@minefold.com>"],
-  
   "settings": [{
       "name": "mp_maxrounds",
       "type": "integer",
@@ -36,6 +28,10 @@
       "label": "Auto Unbalance Limit",
       "description": "Teams are unbalanced when one team has this many more players than the other team. (0 disables check)",
       "default": 30
+    }, {
+      "name": "sv_password",
+      "label": "Server Password",
+      "description": "Players will need this password to connect"
     }
   ]
 }
