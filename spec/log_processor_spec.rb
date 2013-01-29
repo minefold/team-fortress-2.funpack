@@ -4,7 +4,7 @@ require 'log_processor'
 RSpec::Matchers.define :match_event do |type, opts|
   match do |a|
     a.delete(:ts)
-    a == { event: type }.merge(opts || {})
+    { event: type }.merge(opts || {}) == a
   end
 end
 
@@ -29,7 +29,8 @@ describe LogProcessor do
         end
 
         events.last.should match_event('players_list',
-          usernames: []
+          account_type: 'steam',
+          accounts: []
         )
       end
     end
@@ -46,7 +47,11 @@ describe LogProcessor do
       end
 
       events.last.should match_event('players_list',
-        usernames: %w(STEAM_0:1:12345678 STEAM_0:1:23456789)
+        account_type: 'steam',
+        accounts: [
+          SteamID.new('STEAM_0:1:12345678').to_i, 
+          SteamID.new('STEAM_0:1:23456789').to_i
+        ]
       )
     end
   end

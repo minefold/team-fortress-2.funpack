@@ -1,6 +1,7 @@
 require 'json'
 require 'time'
 require 'set'
+require 'steam_id'
 
 class LogProcessor
   def initialize
@@ -19,16 +20,16 @@ class LogProcessor
 
   def process_regular_line(line)
     case line
-    # with STEAM_ID
+    # with STEAM_ID (these aren't occuring at the moment)
     when /^\"([^\<]+.*)\" entered the game$/
       username, slot, account = parse_connected_user($1)
       event 'player_connected',
-        account: account, account_type: 'steam', username: username
+        account: account.to_i, account_type: 'steam', username: username
 
     when /\"([^\<]+.*) disconnected \(reason \"(.+)\"/
       username, slot, account = parse_connected_user($1)
       event 'player_disconnected',
-        account: account, account_type: 'steam', username: username,
+        account: account.to_i, account_type: 'steam', username: username,
         reason: $2
 
     # no STEAM_ID
@@ -71,7 +72,7 @@ class LogProcessor
       nil
 
     when /#\s+\d+\s+"([^"]+)"\s+(STEAM[^ ]+)/
-      @users.add($2)
+      @users.add(SteamID.new($2).to_i)
       emit_players_list
     else
 
@@ -82,7 +83,7 @@ class LogProcessor
   # chrsllyd<2><STEAM_0:1:123456><>
   def parse_connected_user(user)
     user =~ /([^<]+)<(\d+)><([^>]+)>/
-    [$1, $2, $3]
+    [$1, $2, SteamID.new($3)]
   end
 
 
