@@ -2,8 +2,9 @@ require 'rake/testtask'
 
 task :default => :test
 
-$build_dir = File.expand_path("~/tf2/build")
-$cache_dir = File.expand_path("~/tf2/cache")
+$bootstrap_shared = File.expand_path("~/tf2/shared")
+$build_dir = File.expand_path("~/tf2/pack/build")
+$cache_dir = File.expand_path("~/tf2/pack/cache")
 
 Rake::TestTask.new do |t|
   t.libs.push "lib"
@@ -12,21 +13,28 @@ Rake::TestTask.new do |t|
 end
 
 task :bootstrap do
-  system "mkdir -p #{$build_dir}"
-  system "bin/bootstrap #{$build_dir} #{$cache_dir}"
-  # system "cp -R /vagrant/bin ~/build"
+  system "mkdir -p #{$bootstrap_shared}"
+  system "bin/bootstrap #{$bootstrap_shared}"
 end
 
 task :start do
   sid = "1234"
-  server_path = "tmp/servers/#{sid}"
+  server_path = "~/servers/#{sid}"
 
   exec %Q{
     rm -rf #{server_path}
     mkdir -p #{server_path}
     cp test/fixtures/ok.json #{server_path}/settings.json
     cd #{server_path}
-    BUILD_DIR=#{$build_dir} ../../../bin/run settings.json
+    BUILD_DIR=#{$bootstrap_shared} #{$build_dir}/bin/run settings.json
+  }
+end
+
+task :compile do
+  system %Q{
+    rm -rf #{$build_dir}
+    mkdir -p #{$build_dir} #{$cache_dir}
+    bin/compile #{$build_dir} #{$cache_dir}
   }
 end
 

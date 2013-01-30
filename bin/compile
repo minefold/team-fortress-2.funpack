@@ -1,0 +1,51 @@
+#!/bin/bash
+# usage: bin/compile <build-dir> <cache-dir>
+
+set -eo pipefail
+
+mkdir -p "$1" "$2"
+build=$(cd "$1/" && pwd)
+cache=$(cd "$2/" && pwd)
+funpack=$(cd $(dirname $0)/.. && pwd)
+
+# metamod
+mmver="1.10.0-hg816"
+mmurl="http://www.metamodsource.net/mmsdrop/1.10/mmsource-$mmver-linux.tar.gz"
+if test -d $cache/mm-$mmver
+then
+  echo "-----> Using Metamod:Source $mmver"
+else
+  rm -rf $cache/*
+  mkdir -p $cache/mm-$mmver
+  cd $cache/mm-$mmver
+  echo -n "-----> Installing Metamod:Source $mmver"
+  curl -L $mmurl | tar xz
+  echo " done"
+fi
+cp -R $cache/mm-$mmver $build/mm
+
+# source mod
+smver="1.5.0-hg3761"
+smurl="http://www.sourcemod.net/smdrop/1.5/sourcemod-$smver-linux.tar.gz"
+
+if test -d $cache/sm-$smver
+then
+  echo "-----> Using SourceMod $smver"
+else
+  rm -rf $cache/sm-$smver
+  mkdir -p $cache/sm-$smver
+  cd $cache/sm-$smver
+  echo -n "-----> Installing SourceMod $smver..."
+  curl -L $smurl | tar xz
+  echo " done"
+fi
+cp -R $cache/sm-$smver $build/sm
+
+cd $funpack
+mkdir -p $build/bin
+cp bin/run $build/bin/run
+cp -R lib $build/lib
+cp -R templates $build/templates
+cp Gemfile $build/Gemfile
+cp Gemfile.lock $build/Gemfile.lock
+cp funpack.json $build/funpack.json

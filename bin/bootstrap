@@ -6,18 +6,15 @@
 
 # ## Usage
 #
-#     $ bin/bootstrap <build-dir> <cache-dir>
+#     $ bin/bootstrap <shared-dir>
 
 # set -ex
 
-BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
-ROOT_DIR=$(dirname $BIN_DIR)
-BUILD_DIR=$(cd $1; pwd)
-CACHE_DIR=$(cd $2; pwd)
+SHARED_DIR=$(cd $1; pwd)
 
-mkdir -p $CACHE_DIR
+mkdir -p $SHARED_DIR
 
-cd $CACHE_DIR
+cd $SHARED_DIR
 if [ ! -f hldsupdatetool.bin ]
 then
     wget http://storefront.steampowered.com/download/hldsupdatetool.bin
@@ -28,6 +25,3 @@ echo "yes" | ./hldsupdatetool.bin
 ./steam
 ./steam -command update -game tf -dir .
 ./steam -command update -game tf -dir .
-
-rm -rf $BUILD_DIR/*
-cp -R . $BUILD_DIR

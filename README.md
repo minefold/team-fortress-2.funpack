@@ -1,5 +1,13 @@
 # Team Fortress 2 Funpack
 
+## How it works
+
+`bin/compile` runs at publish time and gets the latest version of sourcemod.
+
+`bin/bootstrap` runs once for multiple game runs and downloads the latest version of Steam/TF2.
+
+`bin/run` configures the app with runtime params and starts it.
+
 ## Development Example
 
     $ vagrant up
@@ -7,5 +15,5 @@
     
     -- in guest
     
-    $ ./team-fortress-2.funpack/bin/compile ~/build ~/cache
-    $ FUNPACK_HOME=~/team-fortress-2.funpack GAME_HOME=~/build PORT=28015 team-fortress-2.funpack/bin/run
+    $ cd /vagrant
+    $ rake start

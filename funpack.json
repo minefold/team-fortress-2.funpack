@@ -1,5 +1,8 @@
 { 
   "settings": [{
+      "name": "hostname",
+      "default": "minefold.com TF2 Server"
+  }, {
       "name": "mp_maxrounds",
       "type": "integer",
       "label": "Max Rounds",

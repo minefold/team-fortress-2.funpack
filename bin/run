@@ -7,6 +7,7 @@ $:.unshift File.expand_path('../../lib', __FILE__)
 
 require 'log_processor'
 require 'settings'
+require 'bash'
 
 # ---
 
@@ -18,28 +19,56 @@ $stdin.sync = true
 config_path = ARGV.shift
 build_dir = ENV['BUILD_DIR']
 root = File.expand_path('../..', __FILE__)
+working = `pwd`.strip
 
 config = JSON.parse(File.read(config_path))
 
 server_id = `uuidgen`.strip
 default_cfg = "#{build_dir}/orangebox/tf/cfg/server.cfg"
-server_cfg = "#{build_dir}/orangebox/tf/cfg/server-#{server_id}.cfg"
 
-system %Q{
-rm -f #{default_cfg}
-echo "440" > #{build_dir}/orangebox/steam_appid.txt
+include Bash
+
+bash %Q{
+  rm -f #{default_cfg}
+  echo "440" > #{build_dir}/orangebox/steam_appid.txt
 }
 
-s = Settings.new(config['settings'])
-File.write(server_cfg, s.erb(File.read("#{root}/templates/server.cfg.erb")))
+# Metamod:source
+# all servers share 1 copy of Metamod:source
+bash %Q{
+  cp -R #{root}/mm/* #{build_dir}/orangebox/tf
+  cp #{root}/templates/metamod.vdf #{build_dir}/orangebox/tf/addons
+}
+
+# sourcemod
+# each server has it's own copy of sourcemod
+bash %Q{
+  cp -R #{root}/sm #{working}
+}
+
+s = Settings.new(config['settings'].merge(server_id: server_id))
+{
+  "server.cfg.erb" => 'server.cfg',
+  'sourcemod.vdf.erb' => 'sourcemod.vdf',
+  'admins.cfg.erb' => 'sm/addons/sourcemod/configs/admins.cfg',
+}.each do |src, dest|
+  File.write(dest, s.erb(File.read("#{root}/templates/#{src}")))
+end
+
+# symlinks
+bash %Q{
+  ln -s #{working}/sm/addons/sourcemod #{build_dir}/orangebox/tf/addons/#{server_id}-sourcemod
+  ln -s #{working}/server.cfg #{build_dir}/orangebox/tf/cfg/#{server_id}-server.cfg
+  ln -s #{working}/sourcemod.vdf #{build_dir}/orangebox/tf/addons/metamod/#{server_id}-sourcemod.vdf
+}
 
 # debugging
 File.open('server.log', 'w+') do |log_file|
   log_file.sync = true
 
   Dir.chdir("#{build_dir}/orangebox") do
-    Open3.popen3("unbuffer",
-            "-p",
+    Open3.popen3(
+            "unbuffer", "-p",
             "./srcds_run",
             "-autoupdate",
             "-verify_all",
@@ -49,10 +78,13 @@ File.open('server.log', 'w+') do |log_file|
             "-pingboost", "2",
             "+sv_lan", "0",
             "+hostport", config['port'].to_s,
+            "+mapcyclefile", "#{build_dir}/orangebox/tf/mapcycle.txt",
             "+map", `cat #{build_dir}/orangebox/tf/mapcycle.txt | sort -R | head -n1`.strip,
             "+maxplayers", "24",
             "+fps_max", "300",
-            "+exec", "server-#{server_id}.cfg") do |stdin, stdout, stderr, wait_thr|
+            "+servercfgfile", "#{server_id}-server.cfg",
+            "+sm_basepath", "addons/#{server_id}-sourcemod",
+          ) do |stdin, stdout, stderr, wait_thr|
 
       processor = LogProcessor.new
 
@@ -73,23 +105,30 @@ File.open('server.log', 'w+') do |log_file|
           end
         end
 
-          while true
-            line = stdout.readline
+        while true
+          line = stdout.readline
 
-            # debugging
-            log_file.puts(line)
+          # debugging
+          log_file.puts(line)
 
-            event = processor.process_line(line)
-            if event
-              if %w(player_connected player_disconnected).include?(event[:event])
-                stdin.puts 'status'
-              end
-              puts JSON.dump(event)
-            end
+          event = processor.process_line(line)
+          case event
+          when 'player_connected', 'player_disconnected'
+            stdin.puts 'status'
+
           end
+
+          puts JSON.dump(event) if event
+        end
       rescue EOFError
       end
       exit_status = wait_thr.value
     end
   end
 end
+
+bash %Q{
+  rm -f #{build_dir}/orangebox/tf/addons/#{server_id}-sourcemod
+  rm -f #{build_dir}/orangebox/tf/cfg/#{server_id}-server.cfg
+  rm -f #{build_dir}/orangebox/tf/addons/metamod/#{server_id}-sourcemod.vdf
+}
