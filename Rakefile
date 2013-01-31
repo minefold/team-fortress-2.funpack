@@ -38,9 +38,9 @@ task :compile do
   }
 end
 
-task :publish do
-  paths = %w(bin lib templates Gemfile Gemfile.lock)
+task :publish => :compile do
   system %Q{
-    archive-dir http://party-cloud-production.s3.amazonaws.com/funpacks/slugs/team-fortress-2/stable.tar.lzo #{paths.join(' ')}
+    cd #{$build_dir}
+    archive-dir http://party-cloud-production.s3.amazonaws.com/funpacks/slugs/team-fortress-2/stable.tar.lzo *
   }
 end

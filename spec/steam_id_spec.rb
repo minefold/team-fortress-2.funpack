@@ -8,7 +8,7 @@ describe SteamID do
         should == 76561198009875151
     end
   end
-
+ 
   describe '#to_s' do
     it "converts to STEAM_X style" do
       SteamID.new(76561198009875151).to_s.

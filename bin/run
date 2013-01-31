@@ -78,7 +78,6 @@ File.open('server.log', 'w+') do |log_file|
             "-pingboost", "2",
             "+sv_lan", "0",
             "+hostport", config['port'].to_s,
-            "+mapcyclefile", "#{build_dir}/orangebox/tf/mapcycle.txt",
             "+map", `cat #{build_dir}/orangebox/tf/mapcycle.txt | sort -R | head -n1`.strip,
             "+maxplayers", "24",
             "+fps_max", "300",
@@ -111,14 +110,18 @@ File.open('server.log', 'w+') do |log_file|
           # debugging
           log_file.puts(line)
 
-          event = processor.process_line(line)
-          case event
-          when 'player_connected', 'player_disconnected'
-            stdin.puts 'status'
+          events = processor.process_line(line)
+          events = [events] unless events.kind_of?(Array)
+          events.each do |event|
+            if event
+              if %w(player_connected player_disconnected).include?(event[:event]) and event[:uid].nil?
+                stdin.puts 'status'
+                event = nil
+              end
 
+              puts JSON.dump(event) if event
+            end
           end
-
-          puts JSON.dump(event) if event
         end
       rescue EOFError
       end

@@ -35,11 +35,13 @@
  */
 Admins
 {
-  "Creator"
+  <% admins.split("\n").each.with_index do |admin, i| %>
+  "admin-<%= i %>"
   {
     "auth"      "steam"
-    "identity"    "<%= SteamID.new(admins.split("\n").first).to_s %>"
+    "identity"    "<%= SteamID.new(admin).to_s %>"
     "flags"      "z"
   }
+  <% end %>
 }
 

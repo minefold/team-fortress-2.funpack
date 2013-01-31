@@ -6,6 +6,8 @@ require 'steam_id'
 class LogProcessor
   def initialize
     @listing = false
+    @current_players = {}
+    @prev_players = {}
   end
 
   def process_line(line)
@@ -20,26 +22,13 @@ class LogProcessor
 
   def process_regular_line(line)
     case line
-    # with STEAM_ID (these aren't occuring at the moment)
-    when /^\"([^\<]+.*)\" entered the game$/
-      username, slot, account = parse_connected_user($1)
-      event 'player_connected',
-        account: account.to_i, account_type: 'steam', username: username
-
-    when /\"([^\<]+.*) disconnected \(reason \"(.+)\"/
-      username, slot, account = parse_connected_user($1)
-      event 'player_disconnected',
-        account: account.to_i, account_type: 'steam', username: username,
-        reason: $2
-
     # no STEAM_ID
     when /^Client "(\w+)" connected \(([\d\.:]+)\).$/
-      username, address = $1, $2
-      event 'player_connected',
-        username: username, address: address
+      event 'player_connected', nick: $1, address: $2
 
+    # no STEAM_ID
     when /^Dropped (\w+) from server \(([^\)]+)\)$/
-      event 'player_disconnected', username: $1, reason: $2
+      event 'player_disconnected', nick: $1, reason: $2
 
     when /\"([^\<]+).* say (.+)/
       event 'chat', username: $1, msg: $2.gsub(/^"|"?$/, '')
@@ -50,7 +39,7 @@ class LogProcessor
     when /^hostname: /
       @listing = true
       @user_count = nil
-      @users = Set.new
+      @current_players = {}
       nil
 
     else
@@ -59,9 +48,18 @@ class LogProcessor
   end
 
   def emit_players_list
-    if @user_count == @users.size
+    if @user_count == @current_players.size
       @listing = false
-      event 'players_list', account_type: 'steam', accounts: @users.to_a
+
+      events = []
+      (@current_players.keys - @prev_players.keys).each do |new_player|
+        events << event('player_connected', auth: 'steam', uid: new_player.to_s, nick: @current_players[new_player])
+      end
+      (@prev_players.keys - @current_players.keys).each do |old_player|
+        events << event('player_disconnected', auth: 'steam', uid: old_player.to_s, nick: @prev_players[old_player])
+      end
+      @prev_players = @current_players
+      events << event('players_list', auth: 'steam', uids: @current_players.keys)
     end
   end
 
@@ -72,7 +70,7 @@ class LogProcessor
       nil
 
     when /#\s+\d+\s+"([^"]+)"\s+(STEAM[^ ]+)/
-      @users.add(SteamID.new($2).to_i)
+      @current_players[SteamID.new($2).to_i] = $1
       emit_players_list
     else
 
