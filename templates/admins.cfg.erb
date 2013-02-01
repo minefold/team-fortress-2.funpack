@@ -35,7 +35,7 @@
  */
 Admins
 {
-  <% admins.split("\n").each.with_index do |admin, i| %>
+  <% (admins || "").split("\n").each.with_index do |admin, i| %>
   "admin-<%= i %>"
   {
     "auth"      "steam"
