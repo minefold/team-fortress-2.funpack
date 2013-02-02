@@ -62,8 +62,8 @@ describe LogProcessor do
       events[5][2].should match_event('players_list',
         auth: 'steam',
         uids: [
-          SteamID.new('STEAM_0:1:12345678').to_i,
-          SteamID.new('STEAM_0:1:23456789').to_i
+          SteamID.new('STEAM_0:1:12345678').to_i.to_s,
+          SteamID.new('STEAM_0:1:23456789').to_i.to_s
         ]
       )
     end
