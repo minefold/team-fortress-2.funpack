@@ -1,8 +1,8 @@
 { 
   "settings": [{
       "name": "hostname",
-      "default": "minefold.com TF2 Server"
-  }, {
+      "default": "minefold.com"
+    }, {
       "name": "mp_maxrounds",
       "type": "integer",
       "label": "Max Rounds",
@@ -13,24 +13,6 @@
       "type": "boolean",
       "label": "Auto Team Balance",
       "default": true
-    }, {
-      "name": "mp_autoteambalance_delay",
-      "type": "integer",
-      "label": "Auto Balance Delay (seconds)",
-      "description": "Time after the teams become unbalanced to attempt to switch players.",
-      "default": 60
-    }, {
-      "name": "mp_autoteambalance_warning_delay",
-      "type": "integer",
-      "label": "Auto Balance Warning (seconds)",
-      "description": "Time after the teams become unbalanced to print a balance warning",
-      "default": 30
-    }, {
-      "name": "mp_teams_unbalance_limit",
-      "type": "integer",
-      "label": "Auto Unbalance Limit",
-      "description": "Teams are unbalanced when one team has this many more players than the other team. (0 disables check)",
-      "default": 30
     }, {
       "name": "sv_password",
       "label": "Server Password",

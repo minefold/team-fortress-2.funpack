@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
+$:.unshift File.expand_path('../../lib', __FILE__)
+
+require 'bundler/setup'
 require 'time'
 require 'json'
 require 'open3'
-
-$:.unshift File.expand_path('../../lib', __FILE__)
-
 require 'log_processor'
+require 'brock'
 require 'settings'
 require 'bash'
 
@@ -21,7 +22,7 @@ build_dir = ENV['BUILD_DIR']
 root = File.expand_path('../..', __FILE__)
 working = `pwd`.strip
 
-config = JSON.parse(File.read(config_path))
+config = JSON.parse(File.read(config_path), symbolize_names: true)
 
 server_id = `uuidgen`.strip
 default_cfg = "#{build_dir}/orangebox/tf/cfg/server.cfg"
@@ -46,7 +47,9 @@ bash %Q{
   cp -R #{root}/sm #{working}
 }
 
-s = Settings.new(config['settings'].merge(server_id: server_id))
+defs = JSON.parse(File.read("#{root}/funpack.json"))['settings']
+
+s = Settings.new(defs, config[:settings].merge(server_id: server_id))
 {
   "server.cfg.erb" => 'server.cfg',
   'sourcemod.vdf.erb' => 'sourcemod.vdf',

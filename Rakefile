@@ -26,7 +26,7 @@ task :start do
     mkdir -p #{server_path}
     cp test/fixtures/ok.json #{server_path}/settings.json
     cd #{server_path}
-    BUILD_DIR=#{$bootstrap_shared} #{$build_dir}/bin/run settings.json
+    BUILD_DIR=#{$bootstrap_shared} BUNDLE_GEMFILE=#{$build_dir}/Gemfile #{$build_dir}/bin/run settings.json
   }
 end
 
@@ -35,6 +35,8 @@ task :compile do
     rm -rf #{$build_dir}
     mkdir -p #{$build_dir} #{$cache_dir}
     bin/compile #{$build_dir} #{$cache_dir}
+    cd #{$build_dir}
+    bundle install --deployment --binstubs --without development:test
   }
 end
 

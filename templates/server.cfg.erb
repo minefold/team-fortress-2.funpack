@@ -6,6 +6,7 @@ sv_password <%= sv_password %>
 
 // Hostname for server.
 hostname <%= hostname %>
+sv_tags "minefold"
 
 // Overrides the max players reported to prospective clients
 sv_visiblemaxplayers 32
@@ -122,13 +123,13 @@ net_maxfilesize 15
 mp_autoteambalance <%= mp_autoteambalance ? 0 : 1 %>
 
 // Time after the teams become unbalanced to attempt to switch players.
-mp_autoteambalance_delay <%= mp_autoteambalance_delay %>
+mp_autoteambalance_delay 60
 
 // Time after the teams become unbalanced to print a balance warning
-mp_autoteambalance_warning_delay <%= mp_autoteambalance_warning_delay %>
+mp_autoteambalance_warning_delay 30
 
 // Teams are unbalanced when one team has this many more players than the other team. (0 disables check)
-mp_teams_unbalance_limit <%= mp_teams_unbalance_limit %>
+mp_teams_unbalance_limit 30
 
 
 
