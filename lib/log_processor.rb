@@ -13,6 +13,7 @@ class LogProcessor
   end
 
   def process_line(line)
+    line = line.force_encoding('UTF-8')
     line = line.gsub(/L [\d\/]+ - [\d:]+ /, '').strip
 
     if @listing
@@ -72,7 +73,7 @@ class LogProcessor
       nil
 
     when /#\s+\d+\s+"([^"]+)"\s+(STEAM[^ ]+)/
-      @current_players[SteamID.new($2).to_i] = $1
+      @current_players[SteamID.new($2).to_i.to_s] = $1
       emit_players_list
     else
 

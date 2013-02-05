@@ -8,5 +8,6 @@ describe Settings do
       result = s.erb('mp_maxrounds <%= mp_maxrounds %>')
       result.should == 'mp_maxrounds 5'
     end
+    
   end
 end
