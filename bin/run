@@ -79,6 +79,7 @@ File.open('server.log', 'w+') do |log_file|
             "-game", "tf",
             "-nobreakpad",
             "-pingboost", "2",
+            "-ip", "0.0.0.0:#{config[:port]}",
             "-port", config[:port].to_s,
             "+map", s.map,
             "+maxplayers", "32",
