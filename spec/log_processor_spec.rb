@@ -11,6 +11,12 @@ end
 describe LogProcessor do
   subject { LogProcessor.new }
 
+  def process(input)
+    events = input.strip.split("\n").map do |line|
+      subject.process_line(line.strip)
+    end
+  end
+
   it "detects started" do
     subject.process_line(
       "Sending CMsgGameServerMatchmakingStatus ..."
@@ -30,13 +36,11 @@ describe LogProcessor do
   describe 'list' do
     context 'when empty' do
       it 'returns empty list' do
-        events = [
-          %Q(hostname: minefold.com TF2 Server),
-          %Q(players : 0 (24 max)),
-          %Q(# userid name                uniqueid            connected ping loss state  adr)
-        ].map do |line|
-          subject.process_line(line)
-        end
+        events = process <<-EOS
+          hostname: minefold.com TF2 Server
+          players : 0 (24 max)
+          # userid name                uniqueid            connected ping loss state  adr
+        EOS
 
         events.last[0].should match_event('players_list',
           auth: 'steam',
@@ -46,17 +50,15 @@ describe LogProcessor do
     end
 
     it 'returns connected players' do
-      events = [
-        %Q(hostname: minefold.com TF2 Server),
-        %Q(version : 1.2.5.0/23 5191 secure),
-        %Q(players : 2 (24 max)),
-        %Q(# userid name                uniqueid            connected ping loss state  adr),
-        %Q(#      2 "whatupdave"        STEAM_0:1:12345678  00:47      132   75 spawning 10.10.10.1:27005),
-        %Q(#      3 "chrsllyd"          STEAM_0:1:23456789  00:47      132   75 spawning 10.10.10.1:27005),
-      ].map do |line|
-        subject.process_line(line)
-      end
-
+      events = process <<-EOS
+        hostname: minefold.com TF2 Server
+        version : 1.2.5.0/23 5191 secure
+        players : 2 (24 max)
+        # userid name                uniqueid            connected ping loss state  adr
+        #      2 "whatupdave"        STEAM_0:1:12345678  00:47      132   75 spawning 10.10.10.1:27005
+        #      3 "chrsllyd"          STEAM_0:1:23456789  00:47      132   75 spawning 10.10.10.1:27005
+      EOS
+      
       events[5][0].should match_event('player_connected', auth: 'steam', uid: '76561197984957085', nick: 'whatupdave')
       events[5][1].should match_event('player_connected', auth: 'steam', uid: '76561198007179307', nick: 'chrsllyd')
       events[5][2].should match_event('players_list',
@@ -69,25 +71,42 @@ describe LogProcessor do
     end
 
     it 'returns disconnected players' do
-      events = [
-        %Q(hostname: minefold.com TF2 Server),
-        %Q(players : 2 (24 max)),
-        %Q(# userid name                uniqueid            connected ping loss state  adr),
-        %Q(#      2 "whatupdave"        STEAM_0:1:12345678  00:47      132   75 spawning 10.10.10.1:27005),
-        %Q(#      3 "chrsllyd"          STEAM_0:1:23456789  00:47      132   75 spawning 10.10.10.1:27005),
-        %Q(hostname: minefold.com TF2 Server),
-        %Q(players : 0 (24 max)),
-        %Q(# userid name                uniqueid            connected ping loss state  adr),
-      ].map do |line|
-        subject.process_line(line)
-      end
-
+      events = process <<-EOS
+        hostname: minefold.com TF2 Server
+        players : 2 (24 max)
+        # userid name                uniqueid            connected ping loss state  adr
+        #      2 "whatupdave"        STEAM_0:1:12345678  00:47      132   75 spawning 10.10.10.1:27005
+        #      3 "chrsllyd"          STEAM_0:1:23456789  00:47      132   75 spawning 10.10.10.1:27005
+        hostname: minefold.com TF2 Server
+        players : 0 (24 max)
+        # userid name                uniqueid            connected ping loss state  adr
+      EOS
+      
       events[7][0].should match_event('player_disconnected', auth: 'steam', uid: '76561197984957085', nick: 'whatupdave')
       events[7][1].should match_event('player_disconnected', auth: 'steam', uid: '76561198007179307', nick: 'chrsllyd')
       events[7][2].should match_event('players_list',
         auth: 'steam',
         uids: []
       )
+    end
+
+    it 'understands bots' do
+      events = process <<-EOS
+        hostname: minefold.com
+        version : 1.2.5.1/23 5198 secure
+        udp/ip  : 0.0.0.0:18900  (public ip: 75.101.169.43)
+        account : not logged in  (No account specified)
+        map     : mvm_coaltown_event at: 0 x, 0 y, 0 z
+        players : 2 (32 max)
+
+        # userid name                uniqueid            connected ping loss state  adr
+        #      4 "whatupdave"        STEAM_0:1:24804711  42:34      135    0 active 50.136.136.83:44207
+        #     25 "Target Practice"   BOT                                     active
+      EOS
+      events.last.last.should match_event(
+        'players_list',
+        auth: 'steam',
+        uids: [SteamID.new('STEAM_0:1:24804711').to_i.to_s])
     end
   end
 end

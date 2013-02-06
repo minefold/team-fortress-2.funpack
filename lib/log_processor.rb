@@ -56,13 +56,15 @@ class LogProcessor
 
       events = []
       (@current_players.keys - @prev_players.keys).each do |new_player|
-        events << event('player_connected', auth: 'steam', uid: new_player.to_s, nick: @current_players[new_player])
+        events << event('player_connected', auth: 'steam', uid: new_player.to_i.to_s, nick: @current_players[new_player])
       end
       (@prev_players.keys - @current_players.keys).each do |old_player|
-        events << event('player_disconnected', auth: 'steam', uid: old_player.to_s, nick: @prev_players[old_player])
+        events << event('player_disconnected', auth: 'steam', uid: old_player.to_i.to_s, nick: @prev_players[old_player])
       end
       @prev_players = @current_players
-      events << event('players_list', auth: 'steam', uids: @current_players.keys)
+
+      uids = @current_players.keys.select{|steam_id| !steam_id.bot? }.map(&:to_i).map(&:to_s)
+      events << event('players_list', auth: 'steam', uids: uids)
     end
   end
 
@@ -72,8 +74,8 @@ class LogProcessor
       @user_count = $1.to_i
       nil
 
-    when /#\s+\d+\s+"([^"]+)"\s+(STEAM[^ ]+)/
-      @current_players[SteamID.new($2).to_i.to_s] = $1
+    when /#\s+\d+\s+"([^"]+)"\s+([^ ]+)/
+      @current_players[SteamID.new($2)] = $1
       emit_players_list
     else
 
