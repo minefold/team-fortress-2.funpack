@@ -41,6 +41,22 @@ else
 fi
 cp -R $cache/sm-$smver $build/sm
 
+# pinion
+pver="v1.12.13"
+purl="http://bin.pinion.gg/bin/pinion_adverts/$pver/pinion_adverts.smx"
+if test -d $cache/pinion-$pver
+then
+  echo "-----> Using Pinion $pver"
+else
+  rm -rf $cache/pinion-$pver
+  mkdir -p $cache/pinion-$pver
+  cd $cache/pinion-$pver
+  echo -n "-----> Installing Pinion $pver..."
+  curl -LO $purl
+  echo " done"
+fi
+cp -R $cache/pinion-$pver $build/pinion
+
 cd $funpack
 mkdir -p $build/bin
 cp bin/run $build/bin/run

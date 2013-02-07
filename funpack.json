@@ -1,116 +1,145 @@
 { 
-  "settings": [{
-      "name": "hostname",
-      "default": "minefold.com"
+  "schema": [{
+        "name": "sv_password",
+        "label": "Server Password",
+        "description": "Players will need this password to connect"
+    }, {
+        "name": "rcon_password",
+        "label": "RCON Password",
+        "description": "Allows remote administration with RCON"
     }, {
       "name": "map",
       "label": "Map",
       "description": "Initial map",
-      "default": "ctf_sawmill",
+      "default": "ctf_2fort",
       "values": [{
-          "value": "cp_gravelpit"
+          "value": "arena_badlands"
         }, {
-          "value": "cp_dustbowl"
+          "value": "arena_granary"
         }, {
-          "value": "cp_granary"
+          "value": "arena_lumberyard"
         }, {
-          "value": "cp_well"
+          "value": "arena_nucleus"
         }, {
-          "value": "ctf_2fort"
+          "value": "arena_offblast_final"
         }, {
-          "value": "tc_hydro"
+          "value": "arena_ravine"
         }, {
-          "value": "ctf_well"
+          "value": "arena_sawmill"
+        }, {
+          "value": "arena_watchtower"
+        }, {
+          "value": "arena_well"
+        }, {
+          "value": "cp_5gorge"
         }, {
           "value": "cp_badlands"
         }, {
-          "value": "pl_goldrush"
+          "value": "cp_coldfront"
         }, {
-          "value": "cp_fastlane"
+          "value": "cp_degrootkeep"
         }, {
-          "value": "ctf_turbine"
-        }, {
-          "value": "pl_badwater"
-        }, {
-          "value": "cp_steel"
+          "value": "cp_dustbowl"
         }, {
           "value": "cp_egypt_final"
         }, {
-          "value": "cp_junction_final"
+          "value": "cp_fastlane"
         }, {
-          "value": "plr_pipeline"
+          "value": "cp_foundry"
         }, {
-          "value": "pl_hoodoo_final"
-        }, {
-          "value": "koth_sawmill"
-        }, {
-          "value": "koth_nucleus"
-        }, {
-          "value": "koth_viaduct"
-        }, {
-          "value": "ctf_sawmill"
-        }, {
-          "value": "cp_yukon_final"
-        }, {
-          "value": "koth_harvest_final"
-        }, {
-          "value": "ctf_doublecross"
+          "value": "cp_freight_final1"
         }, {
           "value": "cp_gorge"
         }, {
-          "value": "cp_freight_final1"
+          "value": "cp_granary"
+        }, {
+          "value": "cp_gravelpit"
+        }, {
+          "value": "cp_gullywash_final1"
+        }, {
+          "value": "cp_junction_final"
+        }, {
+          "value": "cp_manor_event"
+        }, {
+          "value": "cp_mountainlab"
+        }, {
+          "value": "cp_steel"
+        }, {
+          "value": "cp_well"
+        }, {
+          "value": "cp_yukon_final"
+        }, {
+          "value": "ctf_2fort"
+        }, {
+          "value": "ctf_doublecross"
+        }, {
+          "value": "ctf_sawmill"
+        }, {
+          "value": "ctf_turbine"
+        }, {
+          "value": "ctf_well"
+        }, {
+          "value": "itemtest"
+        }, {
+          "value": "koth_badlands"
+        }, {
+          "value": "koth_harvest_event"
+        }, {
+          "value": "koth_harvest_final"
+        }, {
+          "value": "koth_king"
+        }, {
+          "value": "koth_lakeside_event"
+        }, {
+          "value": "koth_lakeside_final"
+        }, {
+          "value": "koth_nucleus"
+        }, {
+          "value": "koth_sawmill"
+        }, {
+          "value": "koth_viaduct"
+        }, {
+          "value": "koth_viaduct_event"
+        }, {
+          "value": "mvm_bigrock"
+        }, {
+          "value": "mvm_coaltown"
+        }, {
+          "value": "mvm_coaltown_event"
+        }, {
+          "value": "mvm_decoy"
+        }, {
+          "value": "mvm_mannworks"
+        }, {
+          "value": "pl_badwater"
+        }, {
+          "value": "pl_barnblitz"
+        }, {
+          "value": "pl_frontier_final"
+        }, {
+          "value": "pl_goldrush"
+        }, {
+          "value": "pl_hoodoo_final"
+        }, {
+          "value": "pl_thundermountain"
         }, {
           "value": "pl_upward"
         }, {
           "value": "plr_hightower"
         }, {
-          "value": "pl_thundermountain"
-        }, {
-          "value": "cp_coldfront"
-        }, {
-          "value": "cp_mountainlab"
-        }, {
-          "value": "cp_degrootkeep"
-        }, {
-          "value": "cp_5gorge"
-        }, {
-          "value": "pl_frontier_final"
-        }, {
           "value": "plr_nightfall_final"
         }, {
-          "value": "koth_lakeside_final"
-        }, {
-          "value": "koth_badlands"
-        }, {
-          "value": "pl_barnblitz"
-        }, {
-          "value": "cp_gullywash_final1"
-        }, {
-          "value": "cp_foundry"
+          "value": "plr_pipeline"
         }, {
           "value": "sd_doomsday"
         }, {
-          "value": "koth_king"
+          "value": "tc_hydro"
+        }, {
+          "value": "tr_dustbowl"
+        }, {
+          "value": "tr_target"
         }
       ]
-    }, {
-      "name": "mp_maxrounds",
-      "type": "integer",
-      "label": "Max Rounds",
-      "description": "Maximum number of rounds to play before server changes maps.",
-      "default": 5
-    }, {
-      "name": "mp_autoteambalance",
-      "type": "boolean",
-      "label": "Auto Team Balance",
-      "default": true
-    }, {
-      "name": "sv_password",
-      "label": "Server Password",
-      "description": "Players will need this password to connect"
-    }, {
-      "name": "rcon_password",
-      "label": "RCON Password"
     }
   ]
 }

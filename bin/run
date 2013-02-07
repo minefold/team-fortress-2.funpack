@@ -13,16 +13,15 @@ require 'bash'
 # ---
 
 STDOUT.sync = true
-$stdin.sync = true
 
-# usage: ./run <config>
+# usage: ./run <data>
 
-config_path = ARGV.shift
+data_file = ARGV.shift
 build_dir = ENV['BUILD_DIR']
 root = File.expand_path('../..', __FILE__)
 working = `pwd`.strip
 
-config = JSON.parse(File.read(config_path), symbolize_names: true)
+config = JSON.parse(File.read(data_file), symbolize_names: true)
 
 server_id = `uuidgen`.strip
 default_cfg = "#{build_dir}/orangebox/tf/cfg/server.cfg"
@@ -47,12 +46,19 @@ bash %Q{
   cp -R #{root}/sm #{working}
 }
 
-defs = JSON.parse(File.read("#{root}/funpack.json"))['settings']
+schema = JSON.parse(File.read("#{root}/funpack.json"))['schema']
 
-s = Settings.new(defs, config[:settings].merge(server_id: server_id))
+s = Settings.new(schema,
+  config[:settings].merge(
+    server_id: server_id,
+    hostname: ENV['NAME'],
+    pinion_uid: 'lindenstmadness'
+  )
+)
 {
   "server.cfg.erb" => 'server.cfg',
   'sourcemod.vdf.erb' => 'sourcemod.vdf',
+  'pinion_adverts.cfg.erb' => 'pinion_adverts.cfg',
   'admins.cfg.erb' => 'sm/addons/sourcemod/configs/admins.cfg',
 }.each do |src, dest|
   File.write(dest, s.erb(File.read("#{root}/templates/#{src}")))
@@ -63,6 +69,10 @@ bash %Q{
   ln -s #{working}/sm/addons/sourcemod #{build_dir}/orangebox/tf/addons/#{server_id}-sourcemod
   ln -s #{working}/server.cfg #{build_dir}/orangebox/tf/cfg/#{server_id}-server.cfg
   ln -s #{working}/sourcemod.vdf #{build_dir}/orangebox/tf/addons/metamod/#{server_id}-sourcemod.vdf
+
+  # cp #{root}/pinion/pinion_adverts.smx #{working}/sm/addons/sourcemod/plugins/pinion_adverts.smx
+  # rm -f #{build_dir}/orangebox/tf/cfg/sourcemod/pinion_adverts.cfg
+  # ln -s #{working}/pinion_adverts.cfg #{build_dir}/orangebox/tf/cfg/sourcemod/pinion_adverts.cfg
 }
 
 # debugging
@@ -70,24 +80,22 @@ File.open('server.log', 'w+') do |log_file|
   log_file.sync = true
 
   Dir.chdir("#{build_dir}/orangebox") do
-    Open3.popen3(
-            "unbuffer", "-p",
-            "./srcds_run",
-            "-autoupdate",
-            "-verify_all",
-            "-usercon",
-            "-game", "tf",
-            "-nobreakpad",
-            "-pingboost", "2",
-            "-ip", "0.0.0.0:#{config[:port]}",
-            "-port", config[:port].to_s,
-            "+map", s.map,
-            "+maxplayers", "32",
-            "+fps_max", "300",
-            "+servercfgfile", "#{server_id}-server.cfg",
-            "+sm_basepath", "addons/#{server_id}-sourcemod",
-          ) do |stdin, stdout, stderr, wait_thr|
-
+    Open3.popen3( "unbuffer", "-p",
+                  "./srcds_run",
+                  "-autoupdate",
+                  "-verify_all",
+                  "-usercon",
+                  "-game", "tf",
+                  "-nobreakpad",
+                  "-pingboost", "2",
+                  "-ip", "0.0.0.0:#{config[:port]}", # TODO ENV['PORT']
+                  "-port", config[:port].to_s,
+                  "+map", s.map,
+                  "+maxplayers", "32",
+                  "+fps_max", "300",
+                  "+servercfgfile", "#{server_id}-server.cfg",
+                  "+sm_basepath", "addons/#{server_id}-sourcemod"
+                ) do |stdin, stdout, stderr, wait_thr|
       processor = LogProcessor.new
 
       begin
