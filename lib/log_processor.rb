@@ -56,14 +56,18 @@ class LogProcessor
 
       events = []
       (@current_players.keys - @prev_players.keys).each do |new_player|
-        events << event('player_connected', auth: 'steam', uid: new_player.to_i.to_s, nick: @current_players[new_player])
+        if new_player.valid?
+          events << event('player_connected', auth: 'steam', uid: new_player.to_i.to_s, nick: @current_players[new_player])
+        end
       end
       (@prev_players.keys - @current_players.keys).each do |old_player|
-        events << event('player_disconnected', auth: 'steam', uid: old_player.to_i.to_s, nick: @prev_players[old_player])
+        if old_player.valid?
+          events << event('player_disconnected', auth: 'steam', uid: old_player.to_i.to_s, nick: @prev_players[old_player])
+        end
       end
       @prev_players = @current_players
 
-      uids = @current_players.keys.select{|steam_id| !steam_id.bot? }.map(&:to_i).map(&:to_s)
+      uids = @current_players.keys.select{|steam_id| steam_id.valid? }.map(&:to_i).map(&:to_s)
       events << event('players_list', auth: 'steam', uids: uids)
     end
   end

@@ -1,21 +1,19 @@
 class SteamID
   BASE_64 = 0x0110000100000000
-  BOT = -1
+  UNKNOWN_TYPE = -1 # bots
 
   def initialize(representation)
     if representation =~ /^STEAM/
       x, y, z = representation.split(':').map(&:to_i)
 
       @int64 = (z * 2) + BASE_64 + y
-    elsif representation == 'BOT'
-      @int64 = BOT
     else
-      @int64 = Integer(representation)
+      @int64 = Integer(representation) rescue UNKNOWN_TYPE
     end
   end
 
-  def bot?
-    @int64 == BOT
+  def valid?
+    @int64 != UNKNOWN_TYPE
   end
 
   def to_i
