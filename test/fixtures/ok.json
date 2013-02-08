@@ -1,4 +1,6 @@
 {
-  "port": "10000",
-  "settings": {}
+  "name": "super rad",
+  "settings": {
+    "map": "pl_upward"
+  }
 }

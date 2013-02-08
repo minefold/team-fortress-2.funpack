@@ -14,14 +14,14 @@ require 'bash'
 
 STDOUT.sync = true
 
-# usage: ./run <data>
+# usage: ./run
 
-data_file = ARGV.shift
-build_dir = ENV['BUILD_DIR']
+data_file = ENV['DATAFILE']
+build_dir = ENV['SHARED_DIR']
 root = File.expand_path('../..', __FILE__)
 working = `pwd`.strip
 
-config = JSON.parse(File.read(data_file), symbolize_names: true)
+data = JSON.parse(File.read(data_file), symbolize_names: true)[:settings]
 
 server_id = `uuidgen`.strip
 default_cfg = "#{build_dir}/orangebox/tf/cfg/server.cfg"
@@ -49,9 +49,9 @@ bash %Q{
 schema = JSON.parse(File.read("#{root}/funpack.json"))['schema']
 
 s = Settings.new(schema,
-  config[:settings].merge(
+  data[:settings].merge(
     server_id: server_id,
-    hostname: ENV['NAME'],
+    hostname: data[:name],
     pinion_uid: 'lindenstmadness'
   )
 )
@@ -88,8 +88,8 @@ File.open('server.log', 'w+') do |log_file|
                   "-game", "tf",
                   "-nobreakpad",
                   "-pingboost", "2",
-                  "-ip", "0.0.0.0:#{config[:port]}", # TODO ENV['PORT']
-                  "-port", config[:port].to_s,
+                  "-ip", "0.0.0.0:#{ENV['PORT']}",
+                  "-port", ENV['PORT'],
                   "+map", s.map,
                   "+maxplayers", "32",
                   "+fps_max", "300",

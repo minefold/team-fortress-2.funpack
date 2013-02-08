@@ -33,7 +33,7 @@ task :start do
     mkdir -p #{server_path}
     cp #{settings_file} #{server_path}/settings.json
     cd #{server_path}
-    PORT=10000 NAME="My Rad TF2 Server" BUILD_DIR=#{$bootstrap_shared} BUNDLE_GEMFILE=#{$build_dir}/Gemfile #{$build_dir}/bin/run settings.json
+    PORT=10000 DATAFILE=settings.json SHARED_DIR=#{$bootstrap_shared} BUNDLE_GEMFILE=#{$build_dir}/Gemfile #{$build_dir}/bin/run
   }
 end
 

@@ -60,6 +60,8 @@ cp -R $cache/pinion-$pver $build/pinion
 cd $funpack
 mkdir -p $build/bin
 cp bin/run $build/bin/run
+cp bin/bootstrap $build/bin/bootstrap
+
 cp -R lib $build/lib
 cp -R templates $build/templates
 cp Gemfile $build/Gemfile
