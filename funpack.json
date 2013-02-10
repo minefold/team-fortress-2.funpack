@@ -1,9 +1,15 @@
 { 
   "schema": [{
-        "name": "sv_password",
-        "label": "Server Password",
-        "description": "Players will need this password to connect"
-    }, {
+          "name": "max_players",
+          "label": "Max Players",
+          "type": "integer",
+          "default": 24,
+          "description": "Max players the server supports"
+      }, {
+          "name": "sv_password",
+          "label": "Server Password",
+          "description": "Players will need this password to connect"
+      }, {
         "name": "rcon_password",
         "label": "RCON Password",
         "description": "Allows remote administration with RCON"
