@@ -48,6 +48,8 @@ bash %Q{
 
 schema = JSON.parse(File.read("#{root}/funpack.json"))['schema']
 
+p data
+
 s = Settings.new(schema,
   data[:settings].merge(
     server_id: server_id,

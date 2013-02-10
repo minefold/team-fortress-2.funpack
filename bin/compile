@@ -9,7 +9,7 @@ cache=$(cd "$2/" && pwd)
 funpack=$(cd $(dirname $0)/.. && pwd)
 
 # metamod
-mmver="1.10.0-hg816"
+mmver="1.10.0-hg817"
 mmurl="http://www.metamodsource.net/mmsdrop/1.10/mmsource-$mmver-linux.tar.gz"
 if test -d $cache/mm-$mmver
 then
@@ -25,7 +25,7 @@ fi
 cp -R $cache/mm-$mmver $build/mm
 
 # source mod
-smver="1.5.0-hg3761"
+smver="1.5.0-hg3777"
 smurl="http://www.sourcemod.net/smdrop/1.5/sourcemod-$smver-linux.tar.gz"
 
 if test -d $cache/sm-$smver
