@@ -48,8 +48,6 @@ bash %Q{
 
 schema = JSON.parse(File.read("#{root}/funpack.json"))['schema']
 
-p data
-
 s = Settings.new(schema,
   data[:settings].merge(
     server_id: server_id,
@@ -68,9 +66,11 @@ end
 
 # symlinks
 bash %Q{
-  ln -s #{working}/sm/addons/sourcemod #{build_dir}/orangebox/tf/addons/#{server_id}-sourcemod
   ln -s #{working}/server.cfg #{build_dir}/orangebox/tf/cfg/#{server_id}-server.cfg
-  ln -s #{working}/sourcemod.vdf #{build_dir}/orangebox/tf/addons/metamod/#{server_id}-sourcemod.vdf
+
+  mkdir -p #{build_dir}/orangebox/tf/addons/#{server_id}-metamod
+  ln -s #{working}/sourcemod.vdf #{build_dir}/orangebox/tf/addons/#{server_id}-metamod/sourcemod.vdf
+  cp -R #{working}/sm/addons/sourcemod #{build_dir}/orangebox/tf/addons/#{server_id}-metamod/sourcemod
 
   # cp #{root}/pinion/pinion_adverts.smx #{working}/sm/addons/sourcemod/plugins/pinion_adverts.smx
   # rm -f #{build_dir}/orangebox/tf/cfg/sourcemod/pinion_adverts.cfg
@@ -86,7 +86,6 @@ File.open('server.log', 'w+') do |log_file|
                   "./srcds_run",
                   "-autoupdate",
                   "-verify_all",
-                  "-debug",
                   "-usercon",
                   "-game", "tf",
                   "-nobreakpad",
@@ -97,7 +96,8 @@ File.open('server.log', 'w+') do |log_file|
                   "+maxplayers", "32",
                   "+fps_max", "300",
                   "+servercfgfile", "#{server_id}-server.cfg",
-                  "+sm_basepath", "addons/#{server_id}-sourcemod"
+                  "+mm_basedir", "addons/#{server_id}-metamod",
+                  "+sm_basepath", "addons/#{server_id}-metamod/sourcemod"
                 ) do |stdin, stdout, stderr, wait_thr|
       processor = LogProcessor.new
 
@@ -145,7 +145,7 @@ File.open('server.log', 'w+') do |log_file|
 end
 
 bash %Q{
-  rm -f #{build_dir}/orangebox/tf/addons/#{server_id}-sourcemod
+  rm -rf #{build_dir}/orangebox/tf/addons/#{server_id}-metamod
   rm -f #{build_dir}/orangebox/tf/cfg/#{server_id}-server.cfg
-  rm -f #{build_dir}/orangebox/tf/addons/metamod/#{server_id}-sourcemod.vdf
+  rm -f #{build_dir}/orangebox/tf/addons/metamod-#{server_id}
 }
