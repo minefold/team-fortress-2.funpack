@@ -2,7 +2,8 @@
   "settings": {
     "name": "super rad",
     "settings": {
-      "map": "pl_upward"
+      "map": "pl_upward",
+      "rcon_password": "sup"
     }
   }
 }

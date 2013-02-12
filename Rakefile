@@ -24,11 +24,11 @@ task :bootstrap do
 end
 
 task :start do
-  sid = "1234"
+  sid = ENV['SERVER_ID'] || "1"
   server_path = "~/servers/#{sid}"
   settings_file = File.expand_path('../test/fixtures/ok.json', __FILE__)
 
-  exec %Q{
+  bash %Q{
     rm -rf #{server_path}
     mkdir -p #{server_path}
     cp #{settings_file} #{server_path}/settings.json

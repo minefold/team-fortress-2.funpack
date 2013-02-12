@@ -17,27 +17,27 @@ STDOUT.sync = true
 # usage: ./run
 
 data_file = ENV['DATAFILE']
-build_dir = ENV['SHARED_DIR']
+shared_dir = ENV['SHARED_DIR']
 root = File.expand_path('../..', __FILE__)
 working = `pwd`.strip
 
 data = JSON.parse(File.read(data_file), symbolize_names: true)[:settings]
 
 server_id = `uuidgen`.strip
-default_cfg = "#{build_dir}/orangebox/tf/cfg/server.cfg"
+default_cfg = "#{shared_dir}/orangebox/tf/cfg/server.cfg"
 
 include Bash
 
 bash %Q{
   rm -f #{default_cfg}
-  echo "440" > #{build_dir}/orangebox/steam_appid.txt
+  echo "440" > #{shared_dir}/orangebox/steam_appid.txt
 }
 
 # Metamod:source
 # all servers share 1 copy of Metamod:source
 bash %Q{
-  cp -R #{root}/mm/* #{build_dir}/orangebox/tf
-  cp #{root}/templates/metamod.vdf #{build_dir}/orangebox/tf/addons
+  rsync -a #{root}/mm/ #{shared_dir}/orangebox/tf
+  rsync #{root}/templates/metamod.vdf #{shared_dir}/orangebox/tf/addons
 }
 
 # sourcemod
@@ -66,22 +66,22 @@ end
 
 # symlinks
 bash %Q{
-  ln -s #{working}/server.cfg #{build_dir}/orangebox/tf/cfg/#{server_id}-server.cfg
+  ln -s #{working}/server.cfg #{shared_dir}/orangebox/tf/cfg/#{server_id}-server.cfg
 
-  mkdir -p #{build_dir}/orangebox/tf/addons/#{server_id}-metamod
-  ln -s #{working}/sourcemod.vdf #{build_dir}/orangebox/tf/addons/#{server_id}-metamod/sourcemod.vdf
-  cp -R #{working}/sm/addons/sourcemod #{build_dir}/orangebox/tf/addons/#{server_id}-metamod/sourcemod
+  mkdir -p #{shared_dir}/orangebox/tf/addons/#{server_id}-metamod
+  ln -s #{working}/sourcemod.vdf #{shared_dir}/orangebox/tf/addons/#{server_id}-metamod/sourcemod.vdf
+  cp -R #{working}/sm/addons/sourcemod #{shared_dir}/orangebox/tf/addons/#{server_id}-metamod/sourcemod
 
   # cp #{root}/pinion/pinion_adverts.smx #{working}/sm/addons/sourcemod/plugins/pinion_adverts.smx
-  # rm -f #{build_dir}/orangebox/tf/cfg/sourcemod/pinion_adverts.cfg
-  # ln -s #{working}/pinion_adverts.cfg #{build_dir}/orangebox/tf/cfg/sourcemod/pinion_adverts.cfg
+  # rm -f #{shared_dir}/orangebox/tf/cfg/sourcemod/pinion_adverts.cfg
+  # ln -s #{working}/pinion_adverts.cfg #{shared_dir}/orangebox/tf/cfg/sourcemod/pinion_adverts.cfg
 }
 
 # debugging
 File.open('server.log', 'w+') do |log_file|
   log_file.sync = true
 
-  Dir.chdir("#{build_dir}/orangebox") do
+  Dir.chdir("#{shared_dir}/orangebox") do
     Open3.popen3( "unbuffer", "-p",
                   "./srcds_run",
                   "-autoupdate",
@@ -145,7 +145,7 @@ File.open('server.log', 'w+') do |log_file|
 end
 
 bash %Q{
-  rm -rf #{build_dir}/orangebox/tf/addons/#{server_id}-metamod
-  rm -f #{build_dir}/orangebox/tf/cfg/#{server_id}-server.cfg
-  rm -f #{build_dir}/orangebox/tf/addons/metamod-#{server_id}
+  rm -rf #{shared_dir}/orangebox/tf/addons/#{server_id}-metamod
+  rm -f #{shared_dir}/orangebox/tf/cfg/#{server_id}-server.cfg
+  rm -f #{shared_dir}/orangebox/tf/addons/metamod-#{server_id}
 }
