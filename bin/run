@@ -120,11 +120,21 @@ File.open('server.log', 'w+') do |log_file|
           end
         end
 
+        Thread.new do
+          while true
+            sleep 60
+            stdin.puts 'stats'
+          end
+        end
+
         while true
-          line = stdout.readline
+          line = stdout.readline.strip
 
           # debugging
           log_file.puts(line)
+
+          # ignore commands we write to stdin
+          next if ['', 'status', 'stop', 'stats'].include?(line)
 
           events = processor.process_line(line)
           events = [events] unless events.kind_of?(Array)

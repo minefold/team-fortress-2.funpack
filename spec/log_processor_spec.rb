@@ -90,7 +90,7 @@ describe LogProcessor do
       )
     end
 
-    it 'understands bots' do
+    it 'ignores bots' do
       events = process <<-EOS
         hostname: minefold.com
         players : 2 (32 max)
@@ -103,6 +103,17 @@ describe LogProcessor do
         'players_list',
         auth: 'steam',
         uids: [SteamID.new('STEAM_0:1:12345678').to_i.to_s])
+    end
+
+    it 'translates stats' do
+      events = process <<-EOS
+        CPU    In (KB/s)  Out (KB/s)  Uptime  Map changes  FPS      Players  Connects
+        0.00   9.42       15.28       6       7            166.55   1        1
+      EOS
+
+      events[1].should match_event(
+        'stats', cpu: 0.00, bytes_in: 9.42, bytes_out: 15.28,
+        uptime_mins: 6, map_changes: 7, fps: 166.55, players: 1, connects: 1)
     end
   end
 end
