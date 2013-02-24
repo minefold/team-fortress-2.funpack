@@ -25,4 +25,18 @@ class SteamID
     parity = w % 2
     "STEAM_0:#{parity}:#{w / 2}"
   end
+
+  # equality
+
+  def ==(b)
+    self.to_i == b.to_i
+  end
+
+  def eql?( other )
+    self == other
+  end
+
+  def hash
+    to_i.hash
+  end
 end

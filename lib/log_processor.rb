@@ -55,6 +55,10 @@ class LogProcessor
       @listing = false
 
       events = []
+      p @current_players.keys,
+        @current_players.keys,
+        @current_players.keys - @prev_players.keys
+
       (@current_players.keys - @prev_players.keys).each do |new_player|
         if new_player.valid?
           events << event('player_connected', auth: 'steam', uid: new_player.to_i.to_s, nick: @current_players[new_player])

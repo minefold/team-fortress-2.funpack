@@ -21,7 +21,9 @@ shared_dir = ENV['SHARED_DIR']
 root = File.expand_path('../..', __FILE__)
 working = `pwd`.strip
 
-data = JSON.parse(File.read(data_file), symbolize_names: true)[:settings]
+data = JSON.parse(File.read(data_file), symbolize_names: true)
+# TODO: remove after next pinky deploy
+data = data[:settings][:settings] ? data[:settings] : data
 
 server_id = `uuidgen`.strip
 default_cfg = "#{shared_dir}/orangebox/tf/cfg/server.cfg"

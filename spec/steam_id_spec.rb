@@ -8,11 +8,20 @@ describe SteamID do
         should == 76561198009875151
     end
   end
- 
+
   describe '#to_s' do
     it "converts to STEAM_X style" do
       SteamID.new(76561198009875151).to_s.
         should == 'STEAM_0:1:24804711'
+    end
+  end
+
+  describe '#hash' do
+    it "implements equality" do
+      a = SteamID.new(76561198009875151)
+      b = SteamID.new(76561198009875151)
+
+      ([a] - [b]).should == []
     end
   end
 end

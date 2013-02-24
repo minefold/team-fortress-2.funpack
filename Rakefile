@@ -57,11 +57,4 @@ task :publish => :compile do
   f.close
 
   fail unless system "build/publish #{$build_dir} team-fortress-2 #{f.path}"
-  #
-  # bash <<-EOS
-  #   curl --data '#{JSON.dump(update)}' -X POST minefold.com/webhooks/party_cloud
-  # EOS
-  #   cd #{$build_dir}
-  #   archive-dir http://party-cloud-production.s3.amazonaws.com/funpacks/slugs/team-fortress-2/stable.tar.lzo *
-  # EOS
 end
