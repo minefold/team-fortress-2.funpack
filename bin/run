@@ -48,6 +48,10 @@ bash %Q{
   cp -R #{root}/sm #{working}
 }
 
+bash %Q{
+  rsync -a #{root}/maps/ #{shared_dir}/orangebox/tf/maps
+}
+
 schema = JSON.parse(File.read("#{root}/funpack.json"))['schema']
 
 s = Settings.new(schema,
@@ -95,7 +99,7 @@ File.open('server.log', 'w+') do |log_file|
                   "-ip", "0.0.0.0:#{ENV['PORT']}",
                   "-port", ENV['PORT'],
                   "+map", s.map,
-                  "+maxplayers", "32",
+                  "+maxplayers", s.f('max-players').to_s,
                   "+fps_max", "300",
                   "+servercfgfile", "#{server_id}-server.cfg",
                   "+mm_basedir", "addons/#{server_id}-metamod",

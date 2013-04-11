@@ -19,7 +19,7 @@ else
   mkdir -p $cache/mm-$mmver
   cd $cache/mm-$mmver
   echo -n "-----> Installing Metamod:Source $mmver"
-  curl -L $mmurl | tar xz
+  curl --silent -L $mmurl | tar xz
   echo " done"
 fi
 cp -R $cache/mm-$mmver $build/mm
@@ -36,7 +36,7 @@ else
   mkdir -p $cache/sm-$smver
   cd $cache/sm-$smver
   echo -n "-----> Installing SourceMod $smver..."
-  curl -L $smurl | tar xz
+  curl --silent -L $smurl | tar xz
   echo " done"
 fi
 cp -R $cache/sm-$smver $build/sm
@@ -52,10 +52,16 @@ else
   mkdir -p $cache/pinion-$pver
   cd $cache/pinion-$pver
   echo -n "-----> Installing Pinion $pver..."
-  curl -LO $purl
+  curl --silent -LO $purl
   echo " done"
 fi
 cp -R $cache/pinion-$pver $build/pinion
+
+# maps
+mkdir -p $build/maps
+for map in cp_orange_x3; do
+  curl --silent -L http://funpack-assets.s3.amazonaws.com/team-fortress-2/maps/$map.bsp -o $build/maps/$map.bsp
+done
 
 cd $funpack
 mkdir -p $build/bin
@@ -64,6 +70,7 @@ cp bin/bootstrap $build/bin/bootstrap
 
 cp -R lib $build/lib
 cp -R templates $build/templates
+cp -R .bundle $build/.bundle
 cp Gemfile $build/Gemfile
 cp Gemfile.lock $build/Gemfile.lock
 cp funpack.json $build/funpack.json

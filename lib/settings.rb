@@ -11,9 +11,11 @@ class Settings
   end
 
   def method_missing(meth, *args, &block)
-    name = meth.to_sym
+    f(meth.to_sym)
+  end
 
-    if field = schema.fields.find{|f| f.name == name }
+  def f(name)
+    if field = schema.fields.find{|f| f.name.to_s == name.to_s }
       field_value(field, name)
     elsif value = values[name]
       value

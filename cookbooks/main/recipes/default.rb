@@ -22,7 +22,3 @@ end
 %w(rake bundler).each do |gem|
   gem_package gem
 end
-
-execute "heroku toolbelt" do
-  command "wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh"
-end

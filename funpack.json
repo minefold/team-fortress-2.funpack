@@ -1,18 +1,18 @@
 { 
   "schema": [{
-          "name": "max_players",
-          "label": "Max Players",
-          "type": "integer",
-          "default": 24,
-          "description": "Max players the server supports"
-      }, {
-          "name": "sv_password",
-          "label": "Server Password",
-          "description": "Players will need this password to connect"
-      }, {
-        "name": "rcon_password",
-        "label": "RCON Password",
-        "description": "Allows remote administration with RCON"
+      "name": "max-players",
+      "label": "Max Players",
+      "type": "integer",
+      "default": 24,
+      "description": "Max players the server supports"
+    }, {
+      "name": "sv_password",
+      "label": "Server Password",
+      "description": "Players will need this password to connect"
+    }, {
+      "name": "rcon_password",
+      "label": "RCON Password",
+      "description": "Allows remote administration with RCON"
     }, {
       "name": "map",
       "label": "Map",
@@ -68,6 +68,8 @@
           "value": "cp_manor_event"
         }, {
           "value": "cp_mountainlab"
+        }, {
+          "value": "cp_orange_x3"
         }, {
           "value": "cp_steel"
         }, {
