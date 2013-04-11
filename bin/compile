@@ -70,7 +70,7 @@ cp bin/bootstrap $build/bin/bootstrap
 
 cp -R lib $build/lib
 cp -R templates $build/templates
-cp -R .bundle $build/.bundle
+# cp -R .bundle $build/.bundle
 cp Gemfile $build/Gemfile
 cp Gemfile.lock $build/Gemfile.lock
 cp funpack.json $build/funpack.json
