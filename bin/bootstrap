@@ -15,13 +15,8 @@ SHARED_DIR=$(cd $1; pwd)
 mkdir -p $SHARED_DIR
 
 cd $SHARED_DIR
-if [ ! -f hldsupdatetool.bin ]
+if [ ! -f steamcmd.sh ]
 then
-    wget http://storefront.steampowered.com/download/hldsupdatetool.bin
-    chmod +x hldsupdatetool.bin
+    curl --silent http://media.steampowered.com/client/steamcmd_linux.tar.gz | tar xz
 fi
-
-echo "yes" | ./hldsupdatetool.bin
-./steam
-./steam -command update -game tf -dir .
-./steam -command update -game tf -dir .
+./steamcmd.sh +login anonymous +force_install_dir ./tf2 +app_update 232250 validate +quit
