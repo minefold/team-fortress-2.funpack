@@ -90,7 +90,6 @@ File.open('server.log', 'w+') do |log_file|
   Dir.chdir("#{shared_dir}/orangebox") do
     Open3.popen3( "unbuffer", "-p",
                   "./srcds_run",
-                  "-autoupdate",
                   "-verify_all",
                   "-usercon",
                   "-game", "tf",

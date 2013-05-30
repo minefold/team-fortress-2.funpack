@@ -19,4 +19,7 @@ if [ ! -f steamcmd.sh ]
 then
     curl --silent http://media.steampowered.com/client/steamcmd_linux.tar.gz | tar xz
 fi
-./steamcmd.sh +login anonymous +force_install_dir ./tf2 +app_update 232250 validate +quit
+until ./steamcmd.sh +login anonymous +force_install_dir ./tf2 +app_update 232250 validate +quit; do
+  echo Tansfer disrupted, retrying in 2 seconds...
+  sleep 2
+done
