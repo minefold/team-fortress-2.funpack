@@ -26,20 +26,15 @@ data = JSON.parse(File.read(data_file), symbolize_names: true)
 data = data[:settings][:settings] ? data[:settings] : data
 
 server_id = `uuidgen`.strip
-default_cfg = "#{shared_dir}/orangebox/tf/cfg/server.cfg"
+default_cfg = "#{shared_dir}/tf2/tf/cfg/server.cfg"
 
 include Bash
-
-bash %Q{
-  rm -f #{default_cfg}
-  echo "440" > #{shared_dir}/orangebox/steam_appid.txt
-}
 
 # Metamod:source
 # all servers share 1 copy of Metamod:source
 bash %Q{
-  rsync -a #{root}/mm/ #{shared_dir}/orangebox/tf
-  rsync #{root}/templates/metamod.vdf #{shared_dir}/orangebox/tf/addons
+  rsync -a #{root}/mm/ #{shared_dir}/tf2/tf
+  rsync #{root}/templates/metamod.vdf #{shared_dir}/tf2/tf/addons
 }
 
 # sourcemod
@@ -49,7 +44,7 @@ bash %Q{
 }
 
 bash %Q{
-  rsync -a #{root}/maps/ #{shared_dir}/orangebox/tf/maps
+  rsync -a #{root}/maps/ #{shared_dir}/tf2/tf/maps
 }
 
 schema = JSON.parse(File.read("#{root}/funpack.json"))['schema']
@@ -72,15 +67,15 @@ end
 
 # symlinks
 bash %Q{
-  ln -s #{working}/server.cfg #{shared_dir}/orangebox/tf/cfg/#{server_id}-server.cfg
+  ln -s #{working}/server.cfg #{shared_dir}/tf2/tf/cfg/#{server_id}-server.cfg
 
-  mkdir -p #{shared_dir}/orangebox/tf/addons/#{server_id}-metamod
-  ln -s #{working}/sourcemod.vdf #{shared_dir}/orangebox/tf/addons/#{server_id}-metamod/sourcemod.vdf
-  cp -R #{working}/sm/addons/sourcemod #{shared_dir}/orangebox/tf/addons/#{server_id}-metamod/sourcemod
+  mkdir -p #{shared_dir}/tf2/tf/addons/#{server_id}-metamod
+  ln -s #{working}/sourcemod.vdf #{shared_dir}/tf2/tf/addons/#{server_id}-metamod/sourcemod.vdf
+  cp -R #{working}/sm/addons/sourcemod #{shared_dir}/tf2/tf/addons/#{server_id}-metamod/sourcemod
 
   # cp #{root}/pinion/pinion_adverts.smx #{working}/sm/addons/sourcemod/plugins/pinion_adverts.smx
-  # rm -f #{shared_dir}/orangebox/tf/cfg/sourcemod/pinion_adverts.cfg
-  # ln -s #{working}/pinion_adverts.cfg #{shared_dir}/orangebox/tf/cfg/sourcemod/pinion_adverts.cfg
+  # rm -f #{shared_dir}/tf2/tf/cfg/sourcemod/pinion_adverts.cfg
+  # ln -s #{working}/pinion_adverts.cfg #{shared_dir}/tf2/tf/cfg/sourcemod/pinion_adverts.cfg
 }
 
 # debugging
@@ -160,7 +155,7 @@ File.open('server.log', 'w+') do |log_file|
 end
 
 bash %Q{
-  rm -rf #{shared_dir}/orangebox/tf/addons/#{server_id}-metamod
-  rm -f #{shared_dir}/orangebox/tf/cfg/#{server_id}-server.cfg
-  rm -f #{shared_dir}/orangebox/tf/addons/metamod-#{server_id}
+  rm -rf #{shared_dir}/tf2/tf/addons/#{server_id}-metamod
+  rm -f #{shared_dir}/tf2/tf/cfg/#{server_id}-server.cfg
+  rm -f #{shared_dir}/tf2/tf/addons/metamod-#{server_id}
 }
