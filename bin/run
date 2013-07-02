@@ -82,7 +82,7 @@ bash %Q{
 File.open('server.log', 'w+') do |log_file|
   log_file.sync = true
 
-  Dir.chdir("#{shared_dir}/orangebox") do
+  Dir.chdir("#{shared_dir}/tf2") do
     Open3.popen3( "unbuffer", "-p",
                   "./srcds_run",
                   "-verify_all",
